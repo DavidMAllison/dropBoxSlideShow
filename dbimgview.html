@@ -1,0 +1,148 @@
+<html>
+<head>
+    <title></title>
+        <script src="scripts/jquery-2.1.1.min.js"></script>
+    
+  <style>
+      .slidesjs-navigation,.slidesjs-navigation {
+      display:none;
+      }
+
+    #slides {
+      display: none
+    }
+
+    .container {
+      margin: 0 auto
+    }
+
+    /* For tablets & smart phones */
+    @media (max-width: 767px) {
+      body {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      .container {
+        width: auto
+      }
+    }
+
+    /* For smartphones */
+    @media (max-width: 480px) {
+      .container {
+        width: auto
+      }
+    }
+
+    /* For smaller displays like laptops */
+    @media (min-width: 768px) and (max-width: 979px) {
+      .container {
+        width: 724px
+      }
+    }
+
+    /* For larger displays */
+    @media (min-width: 1200px) {
+      .container {
+        width: 1170px
+      }
+    }
+  </style>
+    <script type="text/javascript">
+        var key = "put key here;
+        var imgArray = [];
+        $(document).ready(function () {
+            var request = $.ajax({
+                type: "GET",
+                async: false,
+                url: "https://api.dropbox.com/1/metadata/auto/Photos",
+                headers: { "Authorization": "Bearer " + key },
+                dataType: "json"
+
+            });
+            request.done(function (dataset) {
+                for (var i = 0; i < dataset.contents.length; i++) {
+                    getDirectoryPhotos(dataset.contents[i].path);
+                }
+
+            });
+
+        });
+
+
+        function getDirectoryPhotos(directoryName) {
+
+            var request = $.ajax({
+                type: "GET",
+                async: false,
+                url: "https://api.dropbox.com/1/metadata/auto/" + directoryName,
+                headers: { "Authorization": "Bearer " + key },
+                dataType: "json"
+
+            });
+            request.done(function (dataset) {
+                for (var i = 0; i < dataset.contents.length; i++) {
+                    imgArray.push({
+                        folder: "directoryName",
+                        imgName: dataset.contents[i].path,
+                        imgDate: dataset.contents[i].client_mtime,
+                        imgUrl: getLink(dataset.contents[i].path)
+                    });
+                }
+                for (var j = 0; j < imgArray.length; j++) {
+
+                    $("#slides").append("<img src='" + imgArray[j].imgUrl + "' />");
+                }
+            });
+        }
+
+        function getLink(imgName) {
+
+            var fullLink = "";
+            var request = $.ajax({
+                type: "GET",
+                async: false,
+                url: "https://api.dropbox.com/1/media/auto" + imgName,
+                headers: { "Authorization": "Bearer " + key },
+                dataType: "json"
+
+            });
+            request.done(function (dataset) {
+                fullLink = dataset.url;
+            });
+
+            return fullLink;
+        }
+    </script>
+</head>
+<body>
+    <div class="">
+        <div id="slides">
+        </div>
+    </div>
+
+    <script src="scripts/dbimgroll.js"></script>
+    <script src="Slides-SlidesJS-3/source/jquery.slides.min.js"></script>
+
+      <script>
+          $(function () {
+              $('#slides').slidesjs({
+                  width: 940,
+                  height: 528,
+                  navigation:{
+                        active:false
+                  },
+                  pagination:{
+                      active: false
+                  },
+                  play: {
+                      active: true,
+                      auto: true,
+                      interval: 4000,
+                      swap: true
+                  }
+              });
+          });
+  </script>
+</body>
+</html>
